@@ -109,3 +109,10 @@ Intel_dataset/
 voxel-flow-master/test_videos/
 voxel-flow-master/voxel_flow_checkpoints/
 
+# video_prediction
+video_prediction-master/data/bair
+video_prediction-master/data/kth
+video_prediction-master/logs/*
+video_prediction-master/pretrained_models/bair_action_free
+video_prediction-master/results_test_samples/*
+
