@@ -94,7 +94,9 @@ def discriminator_given_video_fn(targets, hparams):
     image_sample = tf.gather_nd(targets, tf.stack([t_sample, tf.range(batch_size)], axis=1))
 
     # sample a subsequence of length clip_length and apply the images/video discriminators on those frames
-    t_start = tf.random_uniform([batch_size], minval=0, maxval=sequence_length - clip_length + 1, dtype=tf.int32)
+    # TODO: adding absolute here to make sure max will not be a negative number (sequence_length - clip_length)
+    # TODO: open a pullrequest to fix this bug
+    t_start = tf.random_uniform([batch_size], minval=0, maxval=abs(sequence_length - clip_length) + 1, dtype=tf.int32)
     t_start_indices = tf.stack([t_start, tf.range(batch_size)], axis=1)
     t_offset_indices = tf.stack([tf.range(clip_length), tf.zeros(clip_length, dtype=tf.int32)], axis=1)
     indices = t_start_indices[None] + t_offset_indices[:, None]
