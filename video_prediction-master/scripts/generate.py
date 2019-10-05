@@ -1,3 +1,10 @@
+"""
+--input_dir /media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/Intel_dataset/tf_record/test
+--dataset_hparams sequence_length=8
+--checkpoint ../logs/carla_intel/ours_savp
+--mode test
+--results_dir ../results_test/carla_50k
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -7,7 +14,9 @@ import errno
 import json
 import os
 import random
-
+import sys
+if '/opt/ros/kinetic/lib/python2.7/dist-packages' in sys.path:
+    sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -37,7 +46,7 @@ def main():
     parser.add_argument("--model", type=str, help="model class name")
     parser.add_argument("--model_hparams", type=str, help="a string of comma separated list of model hyperparameters")
 
-    parser.add_argument("--batch_size", type=int, default=8, help="number of samples in batch")
+    parser.add_argument("--batch_size", type=int, default=14, help="number of samples in batch")
     parser.add_argument("--num_samples", type=int, help="number of samples in total (all of them by default)")
     parser.add_argument("--num_epochs", type=int, default=1)
 

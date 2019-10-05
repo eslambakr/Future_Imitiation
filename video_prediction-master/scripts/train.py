@@ -1,12 +1,10 @@
 """
-to run this file:
 --input_dir ../data/bair
 --dataset bair
 --model savp
 --model_hparams_dict ../hparams/bair_action_free/ours_savp/model_hparams.json
 --output_dir ../logs/bair_action_free/ours_savp
 """
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
