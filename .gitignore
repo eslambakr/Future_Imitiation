@@ -105,5 +105,7 @@ venv.bak/
 
 # dataset
 UCF_data/
+Intel_dataset/
 voxel-flow-master/test_videos/
 voxel-flow-master/voxel_flow_checkpoints/
+

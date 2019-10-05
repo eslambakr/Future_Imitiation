@@ -268,9 +268,9 @@ if __name__ == '__main__':
         data_list_path_frame1 = "data_list/ucf101_train_files_frame1.txt"
         data_list_path_frame2 = "data_list/ucf101_train_files_frame2.txt"
         data_list_path_frame3 = "data_list/ucf101_train_files_frame3.txt"
-        data_list_path_frame1 = "test_videos/v_BlowDryHair_g16_c02_avi__frame1.txt"
-        data_list_path_frame2 = "test_videos/v_BlowDryHair_g16_c02_avi__frame2.txt"
-        data_list_path_frame3 = "test_videos/v_BlowDryHair_g16_c02_avi__frame3.txt"
+        data_list_path_frame1 = "/home/eslam/Future_Imitiation/voxel-flow-master/frame1.txt"
+        data_list_path_frame2 = "/home/eslam/Future_Imitiation/voxel-flow-master/frame2.txt"
+        data_list_path_frame3 = "/home/eslam/Future_Imitiation/voxel-flow-master/frame3.txt"
 
         ucf101_dataset_frame1 = dataset.Dataset(data_list_path_frame1)
         ucf101_dataset_frame2 = dataset.Dataset(data_list_path_frame2)

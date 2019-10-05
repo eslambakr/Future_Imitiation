@@ -9,7 +9,7 @@ set -e
 # Or, with parallel from moreutils, you can do it for all videos
 # over many cores:
 #
-#   parallel -j 12 ./extract-ucf101.sh -- $( find -name \*.avi )
+#   parallel -j 4 ./extract-ucf101.sh ::: -- $( find -name \*.avi )
 #
 # but do note that this will produce ~250 GB of PNGs, probably many
 # more frames than you actually would get to use for training
@@ -29,7 +29,6 @@ rm -f ${PREFIX}_frame[123].tmp.txt ${PREFIX}_delayed1_*.png ${PREFIX}_delayed2_*
 
 ffmpeg -loglevel error -i $FILE -vf scale=256:256 ${PREFIX}_%04d.png
 NUM_FRAMES=$( ls -1 ${PREFIX}_*.png | sed 's/.*\([0-9]\{4\}\)\.png$/\1/' | tail -n 1 | sed 's/^0*//' )
-
 # Verify that the frames contain some sort of motion (we use PSNR <35 dB as a proxy).
 # Note that we need to check the entire triplet, since many of the videos seem to have
 # been through some sort of pull-up, so there could be differences between n and n+2,
@@ -49,7 +48,6 @@ cut -d" " -f1,6 < ${PREFIX}.d2.psnr > ${PREFIX}.d2.cut.psnr
 join ${PREFIX}.d1.cut.psnr ${PREFIX}.d2.cut.psnr | sed 's/psnr_avg://g;s/n://;s/\.[0-9]*//g' | while read FRAMENO PSNR1 PSNR2; do
 	#echo FRAMENO=$FRAMENO PSNR1=$PSNR1 PSNR2=$PSNR2
 	if [ "$FRAMENO" -le $(( NUM_FRAMES - 2 )) ] && [ "$PSNR1" != "inf" ] && [ "$PSNR1" -lt 35 ] && [ "$PSNR2" != "inf" ] && [ "$PSNR2" -lt 35 ]; then
-		echo "generate tmp.txt"
                 printf "%s_%04d.png\n" $PREFIX $(( FRAMENO + 0 )) >> ${PREFIX}_frame1.tmp.txt
                 printf "%s_%04d.png\n" $PREFIX $(( FRAMENO + 1 )) >> ${PREFIX}_frame2.tmp.txt
                 printf "%s_%04d.png\n" $PREFIX $(( FRAMENO + 2 )) >> ${PREFIX}_frame3.tmp.txt
