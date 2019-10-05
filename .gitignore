@@ -115,4 +115,5 @@ video_prediction-master/data/kth
 video_prediction-master/logs/*
 video_prediction-master/pretrained_models/bair_action_free
 video_prediction-master/results_test_samples/*
+video_prediction-master/data/test_sample_bair/
 
