@@ -5,6 +5,7 @@ from .sv2p_dataset import SV2PVideoDataset
 from .softmotion_dataset import SoftmotionVideoDataset
 from .kth_dataset import KTHVideoDataset
 from .ucf101_dataset import UCF101VideoDataset
+from .carla_intel_dataset import carla_intel_VideoDataset
 from .cartgripper_dataset import CartgripperVideoDataset
 
 
@@ -16,6 +17,7 @@ def get_dataset_class(dataset):
         'bair': 'SoftmotionVideoDataset',  # alias of softmotion
         'kth': 'KTHVideoDataset',
         'ucf101': 'UCF101VideoDataset',
+        'carla_intel': 'carla_intel_VideoDataset',
         'cartgripper': 'CartgripperVideoDataset',
     }
     dataset_class = dataset_mappings.get(dataset, dataset)

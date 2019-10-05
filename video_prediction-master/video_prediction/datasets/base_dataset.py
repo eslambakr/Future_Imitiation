@@ -464,6 +464,7 @@ if __name__ == '__main__':
         datasets.KTHVideoDataset('data/kth', mode='val'),
         datasets.KTHVideoDataset('data/kth_128', mode='val'),
         datasets.UCF101VideoDataset('data/ucf101', mode='val'),
+        datasets.carla_intel_VideoDataset('data/ucf101', mode='val'),
     ]
     batch_size = 4
 
