@@ -75,7 +75,7 @@ class DataLoader:
 
             gen_images = self.future_generator.generate_future_frames(frames_0, frames_1, frames_2, frames_3, debug=False)
             overall_imgs = []
-            for item_batch in range(self.config.batch_size):
+            for item_batch in range(len(item_nums)):
                 overall_imgs.append(frames_0[item_batch])
                 overall_imgs.append(frames_1[item_batch])
                 overall_imgs.append(frames_2[item_batch])
