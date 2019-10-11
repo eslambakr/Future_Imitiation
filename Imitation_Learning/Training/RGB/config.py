@@ -7,7 +7,7 @@ class Config:
     #               TRAINING OR TESTING CONFIG               #
     ##########################################################
     intel_data = True
-    exp_name = absolute_path + '/experiments/stacking_4_previous_200'
+    exp_name = absolute_path + '/experiments/stacking_4_previous_4_future_200'
     give_car_push = True
     speed_input = True
     separate_throttle_brake = True
@@ -28,6 +28,7 @@ class Config:
     loss_filename = exp_name + '/loss_tracking.txt'
     # if no stacking is needed put the value to 0 (eg: p_stacking_frames = 0)
     p_stacking_frames = 4
+    f_stacking_frames = 4
     debugging = False
     # if no clipping is needed put the value to 0 (eg: clip_until = 0)
     clip_until = 0

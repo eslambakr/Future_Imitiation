@@ -7,7 +7,11 @@ class SingleViewModel(BaseModel):
     def __init__(self, config):
         super().__init__(config)
         self.config = config
-        if self.config.p_stacking_frames:
+        if self.config.p_stacking_frames and self.config.f_stacking_frames:
+            self.X = tf.placeholder(tf.float32,
+                                    [None, self.config.img_h, self.config.img_w,
+                                     self.config.p_stacking_frames+self.config.f_stacking_frames], 'X')
+        elif self.config.p_stacking_frames:
             self.X = tf.placeholder(tf.float32,
                                     [None, self.config.img_h, self.config.img_w, self.config.p_stacking_frames], 'X')
         else:

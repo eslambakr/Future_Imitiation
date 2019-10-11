@@ -13,6 +13,10 @@ from scipy import misc
 import tensorflow as tf
 from Training.RGB.config import Config
 #os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import sys
+if '/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/video_prediction-master/' not in sys.path:
+    sys.path.append('/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/video_prediction-master/')
+from scripts.generate_future import inference_future_generator
 
 
 def main():
@@ -37,8 +41,10 @@ def main():
     model = SingleViewModel(s_config)
     model.load(sess, s_config.load)
     print_network_state()
-    data_loader = DataLoader(s_config, is_training=True)
-    val_loader = DataLoader(s_config, is_training=False)
+    # Intialize future predictor
+    future_generator = inference_future_generator(s_config.f_stacking_frames, batch_size=1)
+    data_loader = DataLoader(s_config, future_generator, is_training=True)
+    val_loader = DataLoader(s_config, future_generator, is_training=False)
     print("Data Loaded Successfully")
     try:
         trainer = Trainer(sess, model, data_loader, val_loader, s_config)

@@ -92,7 +92,20 @@ class Trainer(BaseTrain):
                             x_s = auggmented_batch.copy()
                             ag_cnt += 3
 
-                    if self.config.p_stacking_frames:
+                    if self.config.p_stacking_frames and self.config.f_stacking_frames:
+                        temp = []
+                        temp_gray = []
+                        for num in range(len(x_s)):
+                            temp.append(x_s[num])
+                            if (num + 1) % (self.config.p_stacking_frames + self.config.f_stacking_frames) == 0:
+                                for k in range((self.config.p_stacking_frames + self.config.f_stacking_frames)):
+                                    temp_gray.append(cv2.cvtColor(temp[k], cv2.COLOR_BGR2GRAY))
+                                stacked_batch.append(
+                                    np.swapaxes(np.swapaxes(np.asarray(temp_gray), 0, 1), 1, 2))
+                                temp = []
+                                temp_gray = []
+                        input_images = stacked_batch
+                    elif self.config.p_stacking_frames:
                         temp = []
                         temp_gray = []
                         for num in range(len(x_s)):
@@ -248,7 +261,20 @@ class Trainer(BaseTrain):
 
                     x_s, y, direction = self.val_loader.get_batch(episode_num=itr, item_nums=item_num[start:end])
 
-                    if self.config.p_stacking_frames:
+                    if self.config.p_stacking_frames and self.config.f_stacking_frames:
+                        temp = []
+                        temp_gray = []
+                        for num in range(len(x_s)):
+                            temp.append(x_s[num])
+                            if (num + 1) % (self.config.p_stacking_frames + self.config.f_stacking_frames) == 0:
+                                for k in range((self.config.p_stacking_frames + self.config.f_stacking_frames)):
+                                    temp_gray.append(cv2.cvtColor(temp[k], cv2.COLOR_BGR2GRAY))
+                                stacked_batch.append(
+                                    np.swapaxes(np.swapaxes(np.asarray(temp_gray), 0, 1), 1, 2))
+                                temp = []
+                                temp_gray = []
+                        input_images = stacked_batch
+                    elif self.config.p_stacking_frames:
                         temp = []
                         temp_gray = []
                         for num in range(len(x_s)):

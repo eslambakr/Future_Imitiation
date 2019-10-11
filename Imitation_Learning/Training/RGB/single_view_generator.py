@@ -1,9 +1,13 @@
 import numpy as np
 from os import listdir
+import sys
+if '/opt/ros/kinetic/lib/python2.7/dist-packages' in sys.path:
+    sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+import cv2
 
 
 class DataLoader:
-    def __init__(self, config, is_training):
+    def __init__(self, config, future_generator, is_training):
         self.config = config
         self.episode_num = None
         # Images
@@ -30,6 +34,8 @@ class DataLoader:
             measurements.append(np.load(self.config.labels_dir + '/' + file))
             self.total_size += len(measurements[-1])
         print("Loading labels done ")
+        self.future_generator = future_generator
+
 
     def process_data(self, data):
         if self.config.normalized_input and False:
@@ -51,6 +57,15 @@ class DataLoader:
                     dummy_index = item_num - self.config.p_stacking_frames + 1 + i
                     self.forward_images.append(
                         self.forward_temp[dummy_index if dummy_index >= 0 else 0][self.config.clip_until:, :, :])
+            if self.config.f_stacking_frames:
+                gen_images = self.future_generator.generate_future_frames(self.forward_images[-4],
+                                                                          self.forward_images[-3],
+                                                                          self.forward_images[-2],
+                                                                          self.forward_images[-1],
+                                                                          debug=False)
+                for future_conter in range(self.config.f_stacking_frames):
+                    self.forward_images.append(cv2.resize(gen_images[0, future_conter],
+                                                          (self.config.img_h, self.config.img_h)))
             else:
                 self.forward_images.append(self.forward_temp[item_num][self.config.clip_until:, :, :])
             self.measurements_per_episode.append(self.measurements_per_episode_temp[item_num])
