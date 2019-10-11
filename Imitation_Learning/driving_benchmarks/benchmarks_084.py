@@ -13,6 +13,7 @@ from driving_benchmarks.version084.benchmark_tools import run_driving_benchmark
 from driving_benchmarks.version084.driving_benchmarks import CoRL2017, CARLA100
 from driving_benchmarks.version084.benchmark_tools.experiment_suites.basic_experiment_suite import BasicExperimentSuite
 from driving_benchmarks.version084.benchmark_tools.agent import ForwardAgent
+from driving_benchmarks.version084.benchmark_tools.stacking_4_previous_agent import Stacking_4_previous_Agent
 
 if __name__ == '__main__':
 
@@ -79,7 +80,8 @@ if __name__ == '__main__':
 
     # We instantiate a forward agent, a simple policy that just set
     # acceleration as 0.9 and steering as zero
-    agent = ForwardAgent()
+    #agent = ForwardAgent()
+    agent = Stacking_4_previous_Agent()
 
     # We instantiate an experiment suite. Basically a set of experiments
     # that are going to be evaluated on this benchmark.
@@ -88,7 +90,7 @@ if __name__ == '__main__':
     elif args.carla100:
         experiment_suite = CARLA100(args.city_name)
     else:
-        print (' WARNING: running the basic driving benchmark, to run for CoRL 2017'
+        print(' WARNING: running the basic driving benchmark, to run for CoRL 2017'
                ' experiment suites, you should run'
                ' python driving_benchmark_example.py --corl-2017')
         experiment_suite = BasicExperimentSuite(args.city_name)

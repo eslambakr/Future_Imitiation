@@ -16,6 +16,9 @@ class Agent(object):
     def __init__(self):
         self.__metaclass__ = abc.ABCMeta
 
+    def restart(self):
+        print("restarting agent")
+
     @abc.abstractmethod
     def run_step(self, measurements, sensor_data, directions, target):
         """

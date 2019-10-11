@@ -124,8 +124,9 @@ class BenchmarkRunner(object):
                     client.start_episode(start_index)
                     # Print information on
                     logging.info('======== !!!! ==========')
-                    logging.info(' Start Position %d End Position %d ',
-                                 start_index, end_index)
+                    logging.info(' Start Position %d End Position %d ', start_index, end_index)
+                    # Restarting Agent
+                    agent.restart()
 
                     self._recording.log_poses(start_index, end_index,
                                               experiment.Conditions.WeatherId)
