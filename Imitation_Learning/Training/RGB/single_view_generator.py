@@ -4,6 +4,7 @@ import sys
 if '/opt/ros/kinetic/lib/python2.7/dist-packages' in sys.path:
     sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
+import copy
 
 
 class DataLoader:
@@ -57,18 +58,33 @@ class DataLoader:
                     dummy_index = item_num - self.config.p_stacking_frames + 1 + i
                     self.forward_images.append(
                         self.forward_temp[dummy_index if dummy_index >= 0 else 0][self.config.clip_until:, :, :])
-            if self.config.f_stacking_frames:
-                gen_images = self.future_generator.generate_future_frames(self.forward_images[-4],
-                                                                          self.forward_images[-3],
-                                                                          self.forward_images[-2],
-                                                                          self.forward_images[-1],
-                                                                          debug=False)
-                for future_conter in range(self.config.f_stacking_frames):
-                    self.forward_images.append(cv2.resize(gen_images[0, future_conter],
-                                                          (self.config.img_h, self.config.img_h)))
             else:
                 self.forward_images.append(self.forward_temp[item_num][self.config.clip_until:, :, :])
             self.measurements_per_episode.append(self.measurements_per_episode_temp[item_num])
+        ##########
+        if self.config.f_stacking_frames:
+            frames_0 = []
+            frames_1 = []
+            frames_2 = []
+            frames_3 = []
+            for num in range(0, len(self.forward_images), self.config.p_stacking_frames):
+                frames_0.append(self.forward_images[num + 0])
+                frames_1.append(self.forward_images[num + 1])
+                frames_2.append(self.forward_images[num + 2])
+                frames_3.append(self.forward_images[num + 3])
+
+            gen_images = self.future_generator.generate_future_frames(frames_0, frames_1, frames_2, frames_3, debug=False)
+            overall_imgs = []
+            for item_batch in range(self.config.batch_size):
+                overall_imgs.append(frames_0[item_batch])
+                overall_imgs.append(frames_1[item_batch])
+                overall_imgs.append(frames_2[item_batch])
+                overall_imgs.append(frames_3[item_batch])
+                for future_conter in range(self.config.f_stacking_frames):
+                    overall_imgs.append(cv2.resize(gen_images[item_batch, future_conter],
+                                                   (self.config.img_h, self.config.img_h)))
+            self.forward_images = copy.deepcopy(overall_imgs)
+        ##########
         self.measurements_per_episode = np.asarray(self.measurements_per_episode)
         if self.config.separate_throttle_brake and not self.config.speed_input:
             return self.forward_images, self.measurements_per_episode[:, :3], self.measurements_per_episode[:, 4]

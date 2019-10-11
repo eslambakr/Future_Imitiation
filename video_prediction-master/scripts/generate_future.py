@@ -86,8 +86,8 @@ class inference_future_generator:
         context_frames = self.model.hparams.context_frames
         self.future_length = self.sequence_length - context_frames
         num_examples_per_epoch = dataset.num_examples_per_epoch()
-        if num_examples_per_epoch % self.batch_size != 0:
-            raise ValueError('batch_size should evenly divide the dataset size %d' % num_examples_per_epoch)
+        #if num_examples_per_epoch % self.batch_size != 0:
+        #    raise ValueError('batch_size should evenly divide the dataset size %d' % num_examples_per_epoch)
 
         inputs = dataset.make_batch(self.batch_size)
         self.input_phs = {k: tf.placeholder(v.dtype, v.shape, '%s_ph' % k) for k, v in inputs.items()}
@@ -107,10 +107,11 @@ class inference_future_generator:
 
     def generate_future_frames(self, frame_0, frame_1, frame_2, frame_3, debug=False):
         input_results = np.zeros((self.batch_size, self.sequence_length, self.img_size, self.img_size, 3))
-        input_results[0][0] = cv2.resize(frame_0, (self.img_size, self.img_size))/255
-        input_results[0][1] = cv2.resize(frame_1, (self.img_size, self.img_size))/255
-        input_results[0][2] = cv2.resize(frame_2, (self.img_size, self.img_size))/255
-        input_results[0][3] = cv2.resize(frame_3, (self.img_size, self.img_size))/255
+        for row_num in range(self.batch_size):
+            input_results[row_num][0] = cv2.resize(frame_0[row_num], (self.img_size, self.img_size))/255
+            input_results[row_num][1] = cv2.resize(frame_1[row_num], (self.img_size, self.img_size))/255
+            input_results[row_num][2] = cv2.resize(frame_2[row_num], (self.img_size, self.img_size))/255
+            input_results[row_num][3] = cv2.resize(frame_3[row_num], (self.img_size, self.img_size))/255
         for name, input_ph in self.input_phs.items():
             feed_dict = {input_ph: input_results}
 

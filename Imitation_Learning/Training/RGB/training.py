@@ -42,7 +42,7 @@ def main():
     model.load(sess, s_config.load)
     print_network_state()
     # Intialize future predictor
-    future_generator = inference_future_generator(s_config.f_stacking_frames, batch_size=1)
+    future_generator = inference_future_generator(s_config.f_stacking_frames, batch_size=s_config.batch_size)
     data_loader = DataLoader(s_config, future_generator, is_training=True)
     val_loader = DataLoader(s_config, future_generator, is_training=False)
     print("Data Loaded Successfully")
