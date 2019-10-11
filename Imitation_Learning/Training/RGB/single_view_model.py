@@ -7,9 +7,9 @@ class SingleViewModel(BaseModel):
     def __init__(self, config):
         super().__init__(config)
         self.config = config
-        if self.config.stacking_frames:
+        if self.config.p_stacking_frames:
             self.X = tf.placeholder(tf.float32,
-                                    [None, self.config.img_h, self.config.img_w, self.config.stacking_frames], 'X')
+                                    [None, self.config.img_h, self.config.img_w, self.config.p_stacking_frames], 'X')
         else:
             self.X = tf.placeholder(tf.float32, [None, self.config.img_h, self.config.img_w, 3], 'X')
         if self.config.speed_input:

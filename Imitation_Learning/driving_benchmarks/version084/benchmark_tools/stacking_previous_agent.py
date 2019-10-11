@@ -68,23 +68,23 @@ class Stacking_previous_Agent(Agent):
         #print("direction = ", direction)
         input_img = forward_img[self.t_config.clip_until:, :, :]
 
-        if self.t_config.stacking_frames:
+        if self.t_config.p_stacking_frames:
             temp_gray = []
             for k in range(self.old_imgs_count):
                 # add old images
                 temp_gray.append(self.old_imgs[k])
-            for k in range(self.t_config.stacking_frames - 1 - self.old_imgs_count):
+            for k in range(self.t_config.p_stacking_frames - 1 - self.old_imgs_count):
                 # if not enough old images repeat the last image
                 # will enter here first time only
                 temp_gray.append(cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY))
                 # execute in the last iteration in the loop
-                if k == self.t_config.stacking_frames - 2 - self.old_imgs_count:
+                if k == self.t_config.p_stacking_frames - 2 - self.old_imgs_count:
                     self.old_imgs = copy.deepcopy(temp_gray)
-                    self.old_imgs_count = self.t_config.stacking_frames - 1
+                    self.old_imgs_count = self.t_config.p_stacking_frames - 1
             temp_gray.append(cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY))
             # update self.old_imgs
-            for k in range(self.t_config.stacking_frames - 1):
-                if k == self.t_config.stacking_frames - 2:
+            for k in range(self.t_config.p_stacking_frames - 1):
+                if k == self.t_config.p_stacking_frames - 2:
                     continue
                 else:
                     self.old_imgs[k] = self.old_imgs[k + 1]

@@ -53,7 +53,8 @@ class Config:
     #                     Bench Marking                      #
     ##########################################################
     speed_input = True
-    stacking_frames = 4
+    p_stacking_frames = 4
+    f_stacking_frames = 4
     separate_throttle_brake = True
     if separate_throttle_brake:
         num_of_Actions = 3

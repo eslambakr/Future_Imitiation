@@ -46,9 +46,9 @@ class DataLoader:
             self.measurements_per_episode_temp = np.load(
                 self.config.labels_dir + '/' + self.measurements_files[episode_num])
         for item_num in item_nums:
-            if self.config.stacking_frames:
-                for i in range(self.config.stacking_frames):
-                    dummy_index = item_num - self.config.stacking_frames + 1 + i
+            if self.config.p_stacking_frames:
+                for i in range(self.config.p_stacking_frames):
+                    dummy_index = item_num - self.config.p_stacking_frames + 1 + i
                     self.forward_images.append(
                         self.forward_temp[dummy_index if dummy_index >= 0 else 0][self.config.clip_until:, :, :])
             else:

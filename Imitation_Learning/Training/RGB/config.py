@@ -26,8 +26,8 @@ class Config:
     max_to_keep = 500
     checkpoint_dir = exp_name + '/checkpoints/'
     loss_filename = exp_name + '/loss_tracking.txt'
-    # if no stacking is needed put the value to 0 (eg: stacking_frames = 0)
-    stacking_frames = 4
+    # if no stacking is needed put the value to 0 (eg: p_stacking_frames = 0)
+    p_stacking_frames = 4
     debugging = False
     # if no clipping is needed put the value to 0 (eg: clip_until = 0)
     clip_until = 0
