@@ -16,6 +16,7 @@ from scipy import misc
 import matplotlib.pyplot as plt
 
 
+
 class Trainer(BaseTrain):
     def __init__(self, sess, model, data_loader, val_loader, config):
         super().__init__(sess, model, None, config)
@@ -25,6 +26,16 @@ class Trainer(BaseTrain):
         self.data_loader = data_loader
         self.val_loader = val_loader
 
+    def _create_feed_dict(self, input_images, y, training):
+        if self.config.speed_input:
+            feed_dict = {self.model.X: input_images,
+                         self.model.speed_x: np.expand_dims(y[:, 3], axis=-1),
+                         self.model.y: y[:, :self.config.num_of_Actions], self.model.training: training}
+        else:
+            feed_dict = {self.model.X: input_images, self.model.y: y[:, :self.config.num_of_Actions],
+                         self.model.training: training}
+        return feed_dict
+
     def train(self):
         ag_cnt = 0
         for epoch in range(self.model.cur_epoch_tensor.eval(self.sess), self.config.epochs):
@@ -33,12 +44,30 @@ class Trainer(BaseTrain):
             print("the cuurent learning rate = ", lr)
             losses = []
             losses_val = []
-            losses_s_a = []
-            losses_s_s = []
-            losses_s_b = []
-            losses_s_a_val = []
-            losses_s_s_val = []
-            losses_s_b_val = []
+            losses_0_a = []
+            losses_0_s = []
+            losses_0_b = []
+            losses_1_a = []
+            losses_1_s = []
+            losses_1_b = []
+            losses_2_a = []
+            losses_2_s = []
+            losses_2_b = []
+            losses_3_a = []
+            losses_3_s = []
+            losses_3_b = []
+            losses_0_a_val = []
+            losses_0_s_val = []
+            losses_0_b_val = []
+            losses_1_a_val = []
+            losses_1_s_val = []
+            losses_1_b_val = []
+            losses_2_a_val = []
+            losses_2_s_val = []
+            losses_2_b_val = []
+            losses_3_a_val = []
+            losses_3_s_val = []
+            losses_3_b_val = []
             for itr in tqdm(range(self.data_loader.num_of_episodes)):
                 measurement = np.load(
                     self.data_loader.config.labels_dir + '/' + self.data_loader.measurements_files[itr])
@@ -53,7 +82,7 @@ class Trainer(BaseTrain):
                         start = end - self.config.batch_size
                     if start < 0:
                         start = 0
-                    x_s, y = self.data_loader.get_batch(episode_num=itr, item_nums=item_num[start:end])
+                    x_s, y, direction = self.data_loader.get_batch(episode_num=itr, item_nums=item_num[start:end])
 
                     if self.config.apply_auggmentation:
                         # Apply noise on a portion of the data.
@@ -78,34 +107,120 @@ class Trainer(BaseTrain):
                         input_images = stacked_batch
                     else:
                         input_images = x_s
-                    if self.config.speed_input:
-                        feed_dict = {self.model.X: input_images,
-                                     self.model.speed_x: np.expand_dims(y[:, 3], axis=-1),
-                                     self.model.y: y[:, :self.config.num_of_Actions], self.model.training: True}
-                    else:
-                        feed_dict = {self.model.X: input_images, self.model.y: y[:, :self.config.num_of_Actions],
-                                     self.model.training: True}
+                    # branching the data on the four heads
+                    input_images_0 = []
+                    input_images_1 = []
+                    input_images_2 = []
+                    input_images_3 = []
+                    y_0 = []
+                    y_1 = []
+                    y_2 = []
+                    y_3 = []
+                    for i,dir in enumerate(direction):
+                        if dir == 0:    # follow_lane
+                            input_images_0.append(input_images[i])
+                            y_0.append(y[i])
+                        elif dir == 1:  # left
+                            input_images_1.append(input_images[i])
+                            y_1.append(y[i])
+                        elif dir == 2:  # right
+                            input_images_2.append(input_images[i])
+                            y_2.append(y[i])
+                        elif dir == 3:  # straight
+                            input_images_3.append(input_images[i])
+                            y_3.append(y[i])
+                    y_0 = np.asarray(y_0)
+                    y_1 = np.asarray(y_1)
+                    y_2 = np.asarray(y_2)
+                    y_3 = np.asarray(y_3)
 
-                    if self.config.separate_throttle_brake:
-                        _, loss_s_a, loss_s_s, loss_s_b = self.sess.run([self.model.train_op_s, self.model.loss_s_a,
-                                                                         self.model.loss_s_s, self.model.loss_s_b],
-                                                                        feed_dict=feed_dict)
-                        losses_s_a.append(loss_s_a)
-                        losses_s_s.append(loss_s_s)
-                        losses_s_b.append(loss_s_b)
-                        losses.append(loss_s_a)
-                        losses.append(loss_s_s)
-                        losses.append(loss_s_b)
-                    else:
-                        _, loss_s_a, loss_s_s = self.sess.run(
-                            [self.model.train_op_s, self.model.loss_s_a, self.model.loss_s_s], feed_dict=feed_dict)
-                        losses_s_a.append(loss_s_a)
-                        losses_s_s.append(loss_s_s)
-                        losses.append(loss_s_a)
-                        losses.append(loss_s_s)
+                    # run session
+                    if len(y_0) > 0:
+                        feed_dict = self._create_feed_dict(input_images_0, y_0, training=True)
+                        if self.config.separate_throttle_brake:
+                            _, loss_s_a, loss_s_s, loss_s_b = self.sess.run([self.model.train_op_0, self.model.loss_0_a,
+                                                                             self.model.loss_0_s, self.model.loss_0_b],
+                                                                            feed_dict=feed_dict)
+                            losses_0_a.append(loss_s_a)
+                            losses_0_s.append(loss_s_s)
+                            losses_0_b.append(loss_s_b)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                            losses.append(loss_s_b)
+                        else:
+                            _, loss_s_a, loss_s_s = self.sess.run(
+                                [self.model.train_op_0, self.model.loss_0_a, self.model.loss_0_s], feed_dict=feed_dict)
+                            losses_0_a.append(loss_s_a)
+                            losses_0_s.append(loss_s_s)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                    if len(y_1) > 0:
+                        feed_dict = self._create_feed_dict(input_images_1, y_1, training=True)
+                        if self.config.separate_throttle_brake:
+                            _, loss_s_a, loss_s_s, loss_s_b = self.sess.run([self.model.train_op_1, self.model.loss_1_a,
+                                                                             self.model.loss_1_s, self.model.loss_1_b],
+                                                                            feed_dict=feed_dict)
+                            losses_1_a.append(loss_s_a)
+                            losses_1_s.append(loss_s_s)
+                            losses_1_b.append(loss_s_b)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                            losses.append(loss_s_b)
+                        else:
+                            _, loss_s_a, loss_s_s = self.sess.run(
+                                [self.model.train_op_1, self.model.loss_1_a, self.model.loss_1_s], feed_dict=feed_dict)
+                            losses_1_a.append(loss_s_a)
+                            losses_1_s.append(loss_s_s)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                    if len(y_2) > 0:
+                        feed_dict = self._create_feed_dict(input_images_2, y_2, training=True)
+                        if self.config.separate_throttle_brake:
+                            _, loss_s_a, loss_s_s, loss_s_b = self.sess.run([self.model.train_op_2, self.model.loss_2_a,
+                                                                             self.model.loss_2_s, self.model.loss_2_b],
+                                                                            feed_dict=feed_dict)
+                            losses_2_a.append(loss_s_a)
+                            losses_2_s.append(loss_s_s)
+                            losses_2_b.append(loss_s_b)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                            losses.append(loss_s_b)
+                        else:
+                            _, loss_s_a, loss_s_s = self.sess.run(
+                                [self.model.train_op_2, self.model.loss_2_a, self.model.loss_2_s], feed_dict=feed_dict)
+                            losses_2_a.append(loss_s_a)
+                            losses_2_s.append(loss_s_s)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                    if len(y_3) > 0:
+                        feed_dict = self._create_feed_dict(input_images_3, y_3, training=True)
+                        if self.config.separate_throttle_brake:
+                            _, loss_s_a, loss_s_s, loss_s_b = self.sess.run([self.model.train_op_3, self.model.loss_3_a,
+                                                                             self.model.loss_3_s, self.model.loss_3_b],
+                                                                            feed_dict=feed_dict)
+                            losses_3_a.append(loss_s_a)
+                            losses_3_s.append(loss_s_s)
+                            losses_3_b.append(loss_s_b)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
+                            losses.append(loss_s_b)
+                        else:
+                            _, loss_s_a, loss_s_s = self.sess.run(
+                                [self.model.train_op_3, self.model.loss_3_a, self.model.loss_3_s], feed_dict=feed_dict)
+                            losses_3_a.append(loss_s_a)
+                            losses_3_s.append(loss_s_s)
+                            losses.append(loss_s_a)
+                            losses.append(loss_s_s)
 
-            summaries_dict = {"straight_loss_steer": np.mean(losses_s_s),
-                              "straight_loss_acceleration": np.mean(losses_s_a),
+            # TODO: should add the brake loss too here.
+            summaries_dict = {"follow_loss_steer": np.mean(losses_0_s),
+                              "follow_loss_acceleration": np.mean(losses_0_a),
+                              "left_loss_steer": np.mean(losses_1_s),
+                              "left_loss_acceleration": np.mean(losses_1_a),
+                              "right_loss_steer": np.mean(losses_2_s),
+                              "right_loss_acceleration": np.mean(losses_2_a),
+                              "straight_loss_steer": np.mean(losses_3_s),
+                              "straight_loss_acceleration": np.mean(losses_3_a),
                               "total_loss": np.mean(losses)}
 
             self.summarize(self.model.cur_epoch_tensor.eval(self.sess), summaries_dict=summaries_dict)
@@ -131,7 +246,7 @@ class Trainer(BaseTrain):
                     if start < 0:
                         start = 0
 
-                    x_s, y = self.val_loader.get_batch(episode_num=itr, item_nums=item_num[start:end])
+                    x_s, y, direction = self.val_loader.get_batch(episode_num=itr, item_nums=item_num[start:end])
 
                     if self.config.stacking_frames:
                         temp = []
@@ -149,30 +264,104 @@ class Trainer(BaseTrain):
                     else:
                         input_images = x_s
 
-                    if self.config.speed_input:
-                        feed_dict = {self.model.X: input_images,
-                                     self.model.speed_x: np.expand_dims(y[:, 3], axis=-1),
-                                     self.model.y: y[:, :self.config.num_of_Actions], self.model.training: False}
-                    else:
-                        feed_dict = {self.model.X: input_images, self.model.y: y[:, :self.config.num_of_Actions],
-                                     self.model.training: False}
-
-                    if self.config.separate_throttle_brake:
-                        loss_s_a_val, loss_s_s_val, loss_s_b_val = self.sess.run(
-                            [self.model.loss_s_a, self.model.loss_s_s, self.model.loss_s_b], feed_dict=feed_dict)
-                        losses_s_a_val.append(loss_s_a_val)
-                        losses_s_s_val.append(loss_s_s_val)
-                        losses_s_b_val.append(loss_s_b_val)
-                        losses_val.append(loss_s_a_val)
-                        losses_val.append(loss_s_s_val)
-                        losses_val.append(loss_s_b_val)
-                    else:
-                        loss_s_a_val, loss_s_s_val = self.sess.run(
-                            [self.model.loss_s_a, self.model.loss_s_s], feed_dict=feed_dict)
-                        losses_s_a_val.append(loss_s_a_val)
-                        losses_s_s_val.append(loss_s_s_val)
-                        losses_val.append(loss_s_a_val)
-                        losses_val.append(loss_s_s_val)
+                    # branching the data on the four heads
+                    input_images_0 = []
+                    input_images_1 = []
+                    input_images_2 = []
+                    input_images_3 = []
+                    y_0 = []
+                    y_1 = []
+                    y_2 = []
+                    y_3 = []
+                    for i, dir in enumerate(direction):
+                        if dir == 0:  # follow_lane
+                            input_images_0.append(input_images[i])
+                            y_0.append(y[i])
+                        elif dir == 1:  # left
+                            input_images_1.append(input_images[i])
+                            y_1.append(y[i])
+                        elif dir == 2:  # right
+                            input_images_2.append(input_images[i])
+                            y_2.append(y[i])
+                        elif dir == 3:  # straight
+                            input_images_3.append(input_images[i])
+                            y_3.append(y[i])
+                    y_0 = np.asarray(y_0)
+                    y_1 = np.asarray(y_1)
+                    y_2 = np.asarray(y_2)
+                    y_3 = np.asarray(y_3)
+                    if len(y_0) > 0:
+                        feed_dict = self._create_feed_dict(input_images_0, y_0, training=True)
+                        if self.config.separate_throttle_brake:
+                            loss_s_a_val, loss_s_s_val, loss_s_b_val = self.sess.run(
+                                [self.model.loss_0_a, self.model.loss_0_s, self.model.loss_0_b], feed_dict=feed_dict)
+                            losses_0_a_val.append(loss_s_a_val)
+                            losses_0_s_val.append(loss_s_s_val)
+                            losses_0_b_val.append(loss_s_b_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_b_val)
+                        else:
+                            loss_s_a_val, loss_s_s_val = self.sess.run(
+                                [self.model.loss_0_a, self.model.loss_0_s], feed_dict=feed_dict)
+                            losses_0_a_val.append(loss_s_a_val)
+                            losses_0_s_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                    if len(y_1) > 0:
+                        feed_dict = self._create_feed_dict(input_images_1, y_1, training=True)
+                        if self.config.separate_throttle_brake:
+                            loss_s_a_val, loss_s_s_val, loss_s_b_val = self.sess.run(
+                                [self.model.loss_1_a, self.model.loss_1_s, self.model.loss_1_b], feed_dict=feed_dict)
+                            losses_1_a_val.append(loss_s_a_val)
+                            losses_1_s_val.append(loss_s_s_val)
+                            losses_1_b_val.append(loss_s_b_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_b_val)
+                        else:
+                            loss_s_a_val, loss_s_s_val = self.sess.run(
+                                [self.model.loss_1_a, self.model.loss_1_s], feed_dict=feed_dict)
+                            losses_1_a_val.append(loss_s_a_val)
+                            losses_1_s_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                    if len(y_2) > 0:
+                        feed_dict = self._create_feed_dict(input_images_2, y_2, training=True)
+                        if self.config.separate_throttle_brake:
+                            loss_s_a_val, loss_s_s_val, loss_s_b_val = self.sess.run(
+                                [self.model.loss_2_a, self.model.loss_2_s, self.model.loss_2_b], feed_dict=feed_dict)
+                            losses_2_a_val.append(loss_s_a_val)
+                            losses_2_s_val.append(loss_s_s_val)
+                            losses_2_b_val.append(loss_s_b_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_b_val)
+                        else:
+                            loss_s_a_val, loss_s_s_val = self.sess.run(
+                                [self.model.loss_2_a, self.model.loss_2_s], feed_dict=feed_dict)
+                            losses_2_a_val.append(loss_s_a_val)
+                            losses_2_s_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                    if len(y_3) > 0:
+                        feed_dict = self._create_feed_dict(input_images_3, y_3, training=True)
+                        if self.config.separate_throttle_brake:
+                            loss_s_a_val, loss_s_s_val, loss_s_b_val = self.sess.run(
+                                [self.model.loss_3_a, self.model.loss_3_s, self.model.loss_3_b], feed_dict=feed_dict)
+                            losses_3_a_val.append(loss_s_a_val)
+                            losses_3_s_val.append(loss_s_s_val)
+                            losses_3_b_val.append(loss_s_b_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_b_val)
+                        else:
+                            loss_s_a_val, loss_s_s_val = self.sess.run(
+                                [self.model.loss_3_a, self.model.loss_3_s], feed_dict=feed_dict)
+                            losses_3_a_val.append(loss_s_a_val)
+                            losses_3_s_val.append(loss_s_s_val)
+                            losses_val.append(loss_s_a_val)
+                            losses_val.append(loss_s_s_val)
 
             print('epoch: {0}\tVal_loss: {1}'.format(epoch, np.mean(losses_val)))
             # write loss info in text:

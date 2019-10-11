@@ -7,7 +7,7 @@ class Config:
     #               TRAINING OR TESTING CONFIG               #
     ##########################################################
     intel_data = True
-    exp_name = absolute_path + '/experiments/stacking_4_previous'
+    exp_name = absolute_path + '/experiments/stacking_4_previous_200'
     give_car_push = True
     speed_input = True
     separate_throttle_brake = True
@@ -31,8 +31,8 @@ class Config:
     debugging = False
     # if no clipping is needed put the value to 0 (eg: clip_until = 0)
     clip_until = 0
-    img_h = 64 - clip_until
-    img_w = 64
+    img_h = 200 - clip_until
+    img_w = 200
 
     # summary_dir = '/summaries/'
     visualization_dir = '/visualization/'

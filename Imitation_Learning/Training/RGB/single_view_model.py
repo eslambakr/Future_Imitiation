@@ -114,25 +114,141 @@ class SingleViewModel(BaseModel):
             fc_concat = tf.nn.relu(fc_concat)
         else:
             fc_concat = fc2
-        # head fully connected
-        fc1_head = tf.layers.dense(inputs=fc_concat, units=256,
-                                   kernel_initializer=tf.contrib.layers.xavier_initializer())
-        if self.config.dropout:
-            fc1_head = tf.layers.dropout(fc1_head, rate=0.5, training=self.training)
-        fc1_head = tf.nn.relu(fc1_head)
-        fc2_head = tf.layers.dense(inputs=fc1_head, units=256,
-                                   kernel_initializer=tf.contrib.layers.xavier_initializer())
-        if self.config.dropout:
-            fc2_head = tf.layers.dropout(fc2_head, rate=0.5, training=self.training)
-        fc2_head = tf.nn.relu(fc2_head)
 
+        # Branching on 4 heads
+        # Head 0
+        fc1_head_0 = tf.layers.dense(inputs=fc_concat, units=256,
+                                   kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc1_head_0 = tf.layers.dropout(fc1_head_0, rate=0.5, training=self.training)
+        fc1_head_0 = tf.nn.relu(fc1_head_0)
+        fc2_head_0 = tf.layers.dense(inputs=fc1_head_0, units=256,
+                                   kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc2_head_0 = tf.layers.dropout(fc2_head_0, rate=0.5, training=self.training)
+        fc2_head_0 = tf.nn.relu(fc2_head_0)
         if self.config.separate_throttle_brake:
-            self.output_s = tf.layers.dense(inputs=fc2_head, units=3,
+            self.output_0 = tf.layers.dense(inputs=fc2_head_0, units=3,
                                             kernel_initializer=tf.contrib.layers.xavier_initializer())
         else:
-            self.output_s = tf.layers.dense(inputs=fc2_head, units=2,
+            self.output_0 = tf.layers.dense(inputs=fc2_head_0, units=2,
                                             kernel_initializer=tf.contrib.layers.xavier_initializer())
-        self.v_grads_s = tf.gradients(self.output_s, self.X)[0]
+
+        # Head 1
+        fc1_head_1 = tf.layers.dense(inputs=fc_concat, units=256,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc1_head_1 = tf.layers.dropout(fc1_head_1, rate=0.5, training=self.training)
+        fc1_head_1 = tf.nn.relu(fc1_head_1)
+        fc2_head_1 = tf.layers.dense(inputs=fc1_head_1, units=256,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc2_head_1 = tf.layers.dropout(fc2_head_1, rate=0.5, training=self.training)
+        fc2_head_1 = tf.nn.relu(fc2_head_1)
+        if self.config.separate_throttle_brake:
+            self.output_1 = tf.layers.dense(inputs=fc2_head_1, units=3,
+                                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+        else:
+            self.output_1 = tf.layers.dense(inputs=fc2_head_1, units=2,
+                                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+
+        # Head 2
+        fc1_head_2 = tf.layers.dense(inputs=fc_concat, units=256,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc1_head_2 = tf.layers.dropout(fc1_head_2, rate=0.5, training=self.training)
+        fc1_head_2 = tf.nn.relu(fc1_head_2)
+        fc2_head_2 = tf.layers.dense(inputs=fc1_head_2, units=256,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc2_head_2 = tf.layers.dropout(fc2_head_2, rate=0.5, training=self.training)
+        fc2_head_2 = tf.nn.relu(fc2_head_2)
+        if self.config.separate_throttle_brake:
+            self.output_2 = tf.layers.dense(inputs=fc2_head_2, units=3,
+                                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+        else:
+            self.output_2 = tf.layers.dense(inputs=fc2_head_2, units=2,
+                                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+
+        # Head 3
+        fc1_head_3 = tf.layers.dense(inputs=fc_concat, units=256,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc1_head_3 = tf.layers.dropout(fc1_head_3, rate=0.5, training=self.training)
+        fc1_head_3 = tf.nn.relu(fc1_head_3)
+        fc2_head_3 = tf.layers.dense(inputs=fc1_head_3, units=256,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer())
+        if self.config.dropout:
+            fc2_head_3 = tf.layers.dropout(fc2_head_3, rate=0.5, training=self.training)
+        fc2_head_3 = tf.nn.relu(fc2_head_3)
+        if self.config.separate_throttle_brake:
+            self.output_3 = tf.layers.dense(inputs=fc2_head_3, units=3,
+                                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+        else:
+            self.output_3 = tf.layers.dense(inputs=fc2_head_3, units=2,
+                                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+
+        self.contrast_node = tf.image.random_contrast(self.X, lower=self.config.auggmentation_contrast_lower,
+                                                      upper=self.config.auggmentation_contrast_upper)
+        self.brightness_node = tf.image.random_brightness(self.X,
+                                                          max_delta=self.config.auggmentation_brightness_max_delta)
+
+        if self.config.separate_throttle_brake:
+            self.loss_0_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_0[:, 0])
+            self.loss_0_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_0[:, 1])
+            self.loss_0_b = tf.losses.mean_squared_error(self.y[:, 2], self.output_0[:, 2])
+            self.loss_0 = tf.reduce_mean(self.loss_0_a + self.loss_0_s + self.loss_0_b)
+        else:
+            self.loss_0_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_0[:, 0])
+            self.loss_0_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_0[:, 1])
+            self.loss_0 = tf.reduce_mean(self.loss_0_s + self.loss_0_a)
+
+        if self.config.separate_throttle_brake:
+            self.loss_1_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_1[:, 0])
+            self.loss_1_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_1[:, 1])
+            self.loss_1_b = tf.losses.mean_squared_error(self.y[:, 2], self.output_1[:, 2])
+            self.loss_1 = tf.reduce_mean(self.loss_1_a + self.loss_1_s + self.loss_1_b)
+        else:
+            self.loss_1_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_1[:, 0])
+            self.loss_1_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_1[:, 1])
+            self.loss_1 = tf.reduce_mean(self.loss_1_s + self.loss_1_a)
+
+        if self.config.separate_throttle_brake:
+            self.loss_2_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_2[:, 0])
+            self.loss_2_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_2[:, 1])
+            self.loss_2_b = tf.losses.mean_squared_error(self.y[:, 2], self.output_2[:, 2])
+            self.loss_2 = tf.reduce_mean(self.loss_2_a + self.loss_2_s + self.loss_2_b)
+        else:
+            self.loss_2_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_2[:, 0])
+            self.loss_2_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_2[:, 1])
+            self.loss_2 = tf.reduce_mean(self.loss_2_s + self.loss_2_a)
+
+        if self.config.separate_throttle_brake:
+            self.loss_3_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_3[:, 0])
+            self.loss_3_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_3[:, 1])
+            self.loss_3_b = tf.losses.mean_squared_error(self.y[:, 2], self.output_3[:, 2])
+            self.loss_3 = tf.reduce_mean(self.loss_3_a + self.loss_3_s + self.loss_3_b)
+        else:
+            self.loss_3_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_3[:, 0])
+            self.loss_3_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_3[:, 1])
+            self.loss_3 = tf.reduce_mean(self.loss_3_s + self.loss_3_a)
+
+        # Add decayed learning rate:
+        if self.config.decay_lr:
+            self.decayed_lr = tf.train.exponential_decay(learning_rate=self.config.learning_rate, decay_steps=2700,
+                                                         global_step=self.global_step_tensor, decay_rate=0.96,
+                                                         staircase=False)
+            optimizer = tf.train.AdamOptimizer(self.decayed_lr)
+        else:
+            optimizer = tf.train.AdamOptimizer(self.config.learning_rate)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.train_op_0 = optimizer.minimize(self.loss_0, global_step=self.global_step_tensor)
+            self.train_op_1 = optimizer.minimize(self.loss_1, global_step=self.global_step_tensor)
+            self.train_op_2 = optimizer.minimize(self.loss_2, global_step=self.global_step_tensor)
+            self.train_op_3 = optimizer.minimize(self.loss_3, global_step=self.global_step_tensor)
+
+        self.v_grads_s = tf.gradients(self.output_0, self.X)[0]
         self.v_grads_s_abs = tf.abs(self.v_grads_s)  # tf.image.adjust_contrast(tf.abs(self.v_grads_s), 0.85)
 
         if self.config.apply_auggmentation:
@@ -140,25 +256,3 @@ class SingleViewModel(BaseModel):
                                                           upper=self.config.auggmentation_contrast_upper)
             self.brightness_node = tf.image.random_brightness(self.X,
                                                               max_delta=self.config.auggmentation_brightness_max_delta)
-
-        if self.config.separate_throttle_brake:
-            self.loss_s_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_s[:, 0])
-            self.loss_s_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_s[:, 1])
-            self.loss_s_b = tf.losses.mean_squared_error(self.y[:, 2], self.output_s[:, 2])
-            self.loss_s = self.loss_s_s + self.loss_s_a + self.loss_s_b
-        else:
-            self.loss_s_a = tf.losses.mean_squared_error(self.y[:, 0], self.output_s[:, 0])
-            self.loss_s_s = tf.losses.mean_squared_error(self.y[:, 1], self.output_s[:, 1])
-            self.loss_s = self.loss_s_s + self.loss_s_a
-
-        # Add decayed learning rate:
-        if self.config.decay_lr:
-            self.decayed_lr = tf.train.exponential_decay(learning_rate=self.config.learning_rate, decay_steps=1510,
-                                                    global_step=self.global_step_tensor, decay_rate=0.96, staircase=False)
-            optimizer = tf.train.AdamOptimizer(self.decayed_lr)
-        else:
-            optimizer = tf.train.AdamOptimizer(self.config.learning_rate)
-
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
-            self.train_op_s = optimizer.minimize(self.loss_s, global_step=self.global_step_tensor)

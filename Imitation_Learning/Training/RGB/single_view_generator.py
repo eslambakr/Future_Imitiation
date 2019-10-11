@@ -56,9 +56,9 @@ class DataLoader:
             self.measurements_per_episode.append(self.measurements_per_episode_temp[item_num])
         self.measurements_per_episode = np.asarray(self.measurements_per_episode)
         if self.config.separate_throttle_brake and not self.config.speed_input:
-            return self.forward_images, self.measurements_per_episode[:, :3]
+            return self.forward_images, self.measurements_per_episode[:, :3], self.measurements_per_episode[:, 4]
         if self.config.separate_throttle_brake and self.config.speed_input:
-            return self.forward_images, self.measurements_per_episode
+            return self.forward_images, self.measurements_per_episode, self.measurements_per_episode[:, 4]
         else:
             # TODO: cover this case {if not self.config.separate_throttle_brake and self.config.speed_input}
-            return self.forward_images, self.measurements_per_episode[:, :2]
+            return self.forward_images, self.measurements_per_episode[:, :2], self.measurements_per_episode[:, 4]
