@@ -92,7 +92,7 @@ class Trainer(BaseTrain):
                             x_s = auggmented_batch.copy()
                             ag_cnt += 3
 
-                    if self.config.p_stacking_frames and self.config.f_stacking_frames:
+                    if self.config.p_stacking_frames and self.config.f_stacking_frames and not self.config.preprocessed_data:
                         temp = []
                         temp_gray = []
                         for num in range(len(x_s)):
@@ -105,7 +105,7 @@ class Trainer(BaseTrain):
                                 temp = []
                                 temp_gray = []
                         input_images = stacked_batch
-                    elif self.config.p_stacking_frames:
+                    elif self.config.p_stacking_frames and not self.config.preprocessed_data:
                         temp = []
                         temp_gray = []
                         for num in range(len(x_s)):
@@ -261,7 +261,7 @@ class Trainer(BaseTrain):
 
                     x_s, y, direction = self.val_loader.get_batch(episode_num=itr, item_nums=item_num[start:end])
 
-                    if self.config.p_stacking_frames and self.config.f_stacking_frames:
+                    if self.config.p_stacking_frames and self.config.f_stacking_frames and not self.config.preprocessed_data:
                         temp = []
                         temp_gray = []
                         for num in range(len(x_s)):
@@ -274,7 +274,7 @@ class Trainer(BaseTrain):
                                 temp = []
                                 temp_gray = []
                         input_images = stacked_batch
-                    elif self.config.p_stacking_frames:
+                    elif self.config.p_stacking_frames and not self.config.preprocessed_data:
                         temp = []
                         temp_gray = []
                         for num in range(len(x_s)):

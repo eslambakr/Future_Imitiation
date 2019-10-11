@@ -7,6 +7,7 @@ class Config:
     #               TRAINING OR TESTING CONFIG               #
     ##########################################################
     intel_data = True
+    preprocessed_data = True
     exp_name = absolute_path + '/experiments/stacking_4_previous_4_future_200'
     give_car_push = True
     speed_input = True
@@ -42,7 +43,12 @@ class Config:
     saving_visualization_img_left_path = visualization_dir + 'vis_left'
 
     # Data set Training dir
-    if intel_data:
+    if preprocessed_data:
+        main_dir = '/media/eslam/0d208863-5cdb-4a43-9794-3ca8726831b3/preprocessed_future_data/'
+        straight_images_dir = main_dir + 'rgb/Training'
+        labels_dir = main_dir + 'labels/Training'
+        direction_dir = main_dir + 'direction/Training'
+    elif intel_data:
         main_dir = '/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/Intel_dataset/npys/'
         straight_images_dir = main_dir + 'rgb/Training'
         labels_dir = main_dir + 'labels/Training'
@@ -52,7 +58,12 @@ class Config:
         labels_dir = main_dir + 'measurements'
 
     # Data set Validation dir
-    if intel_data:
+    if preprocessed_data:
+        validation_dir = '/media/eslam/0d208863-5cdb-4a43-9794-3ca8726831b3/preprocessed_future_data/'
+        straight_val_dir = main_dir + 'rgb/Training'
+        labels_val_dir = main_dir + 'labels/Training'
+        direction_val_dir = main_dir + 'direction/Training'
+    elif intel_data:
         validation_dir = '/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/Intel_dataset/npys/'
         straight_val_dir = validation_dir + 'rgb/Val'
         labels_val_dir = validation_dir + 'labels/Val'
