@@ -53,7 +53,7 @@ class Agent(object):
         :returns A carla Control object, with the steering/gas/brake for the agent
         """
 
-class Stacking_4_previous_Agent(Agent):
+class Stacking_previous_Agent(Agent):
     """
     Simple derivation of Agent Class,
     A trivial agent agent that goes straight
