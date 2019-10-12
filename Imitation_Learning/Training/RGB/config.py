@@ -60,9 +60,9 @@ class Config:
     # Data set Validation dir
     if preprocessed_data:
         validation_dir = '/media/eslam/0d208863-5cdb-4a43-9794-3ca8726831b3/preprocessed_future_data/'
-        straight_val_dir = main_dir + 'rgb/Training'
-        labels_val_dir = main_dir + 'labels/Training'
-        direction_val_dir = main_dir + 'direction/Training'
+        straight_val_dir = main_dir + 'rgb/Val'
+        labels_val_dir = main_dir + 'labels/Val'
+        direction_val_dir = main_dir + 'direction/Val'
     elif intel_data:
         validation_dir = '/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/Intel_dataset/npys/'
         straight_val_dir = validation_dir + 'rgb/Val'
