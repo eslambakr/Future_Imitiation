@@ -116,4 +116,12 @@ video_prediction-master/logs/*
 video_prediction-master/pretrained_models/bair_action_free
 video_prediction-master/results_test_samples/*
 video_prediction-master/data/test_sample_bair/
+CARLA_0.8.2/
+CARLA_0.8.4/
+Imitation_Learning/.idea/
+Imitation_Learning/driving_benchmarks/_benchmarks_results/
+Imitation_Learning/weights/
+video_prediction-master/results_test/
+
+
 
