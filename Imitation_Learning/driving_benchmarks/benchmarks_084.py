@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#--corl-2017 -n test --continue-experiment
+
 # Copyright (c) 2017 Computer Vision Center (CVC) at the Universitat Autonoma de
 # Barcelona (UAB).
 #

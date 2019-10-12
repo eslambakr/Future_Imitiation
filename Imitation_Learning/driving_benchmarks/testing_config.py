@@ -71,7 +71,7 @@ class Config:
     dropout = False
     is_training = False
     load = True
-    checkpoint_dir = "/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/Imitation_Learning/weights/experiments/stacking_4_previous_200/checkpoints"
+    checkpoint_dir = "/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/Imitation_Learning/weights/experiments/stacking_4_previous_4_future_200/checkpoints"
     give_car_push = True
     # Training
     epochs = 500

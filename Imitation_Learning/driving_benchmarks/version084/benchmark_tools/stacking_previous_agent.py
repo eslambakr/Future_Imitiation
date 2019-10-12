@@ -21,7 +21,9 @@ import copy
 import tensorflow as tf
 from Training.RGB.single_view_model import SingleViewModel
 from Training.RGB.utils.model_summary import print_network_state
-
+if '/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/video_prediction-master/' not in sys.path:
+    sys.path.append('/media/eslam/426b7820-cb81-4c46-9430-be5429970ddb/home/eslam/Future_Imitiation/video_prediction-master/')
+from scripts.generate_future import inference_future_generator
 
 
 class Agent(object):
@@ -38,12 +40,15 @@ class Agent(object):
         self.model = SingleViewModel(self.t_config)
         self.model.load(self.sess, self.t_config.load)
         print_network_state()
+        self.future_generator = inference_future_generator(num_of_generated_frames=4, batch_size=1)
 
     def restart(self):
         print("restarting agent")
         self.old_imgs_count = 0
+        self.old_imgs_count_gray = 0
         self.push_counter = 0
         self.old_imgs = []
+        self.old_imgs_gray = []
 
     @abc.abstractmethod
     def run_step(self, measurements, sensor_data, directions, target):
@@ -70,27 +75,66 @@ class Stacking_previous_Agent(Agent):
 
         if self.t_config.p_stacking_frames:
             temp_gray = []
-            for k in range(self.old_imgs_count):
+            for k in range(self.old_imgs_count_gray):
                 # add old images
-                temp_gray.append(self.old_imgs[k])
-            for k in range(self.t_config.p_stacking_frames - 1 - self.old_imgs_count):
+                temp_gray.append(self.old_imgs_gray[k])
+            for k in range(self.t_config.p_stacking_frames - 1 - self.old_imgs_count_gray):
                 # if not enough old images repeat the last image
                 # will enter here first time only
                 temp_gray.append(cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY))
                 # execute in the last iteration in the loop
-                if k == self.t_config.p_stacking_frames - 2 - self.old_imgs_count:
-                    self.old_imgs = copy.deepcopy(temp_gray)
-                    self.old_imgs_count = self.t_config.p_stacking_frames - 1
+                if k == self.t_config.p_stacking_frames - 2 - self.old_imgs_count_gray:
+                    self.old_imgs_gray = copy.deepcopy(temp_gray)
+                    self.old_imgs_count_gray = self.t_config.p_stacking_frames - 1
+            # add current frame
             temp_gray.append(cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY))
+            # update self.old_imgs_gray
+            for k in range(self.t_config.p_stacking_frames - 1):
+                if k == self.t_config.p_stacking_frames - 2:
+                    continue
+                else:
+                    self.old_imgs_gray[k] = self.old_imgs_gray[k + 1]
+            self.old_imgs_gray[-1] = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+            p_input_img = np.swapaxes(np.swapaxes(np.asarray(temp_gray), 0, 1), 1, 2)
+
+        if self.t_config.f_stacking_frames:
+            temp = []
+            for k in range(self.old_imgs_count):
+                # add old images
+                temp.append(self.old_imgs[k])
+            for k in range(self.t_config.p_stacking_frames - 1 - self.old_imgs_count):
+                # if not enough old images repeat the last image
+                # will enter here first time only
+                temp.append(cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB))
+                # execute in the last iteration in the loop
+                if k == self.t_config.p_stacking_frames - 2 - self.old_imgs_count:
+                    self.old_imgs = copy.deepcopy(temp)
+                    self.old_imgs_count = self.t_config.p_stacking_frames - 1
+            # add current frame
+            temp.append(cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB))
             # update self.old_imgs
             for k in range(self.t_config.p_stacking_frames - 1):
                 if k == self.t_config.p_stacking_frames - 2:
                     continue
                 else:
                     self.old_imgs[k] = self.old_imgs[k + 1]
-            self.old_imgs[-1] = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
-            input_img = np.swapaxes(np.swapaxes(np.asarray(temp_gray), 0, 1), 1, 2)
+            self.old_imgs[-1] = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+            #p_input_img_colored = np.swapaxes(np.swapaxes(np.asarray(temp), 0, 1), 1, 2)
+            p_input_img_colored = np.asarray(temp)
 
+            gen_images = self.future_generator.generate_future_frames(np.expand_dims(p_input_img_colored[0], axis=0),
+                                                                      np.expand_dims(p_input_img_colored[1], axis=0),
+                                                                      np.expand_dims(p_input_img_colored[2], axis=0),
+                                                                      np.expand_dims(p_input_img_colored[3], axis=0),
+                                                                      debug=False)
+            gen_images_resized = []
+            for img in gen_images[0]:
+                gen_images_resized.append(cv2.cvtColor(cv2.resize(img, (self.t_config.img_h, self.t_config.img_w)),
+                                                       cv2.COLOR_BGR2GRAY))
+            gen_images_resized = np.swapaxes(np.swapaxes(np.asarray(gen_images_resized), 0, 1), 1, 2)
+            input_img = np.concatenate((p_input_img, gen_images_resized), axis=-1)
+        else:
+            input_img = p_input_img
         input_img = np.expand_dims(input_img, axis=0)
 
         if self.t_config.separate_throttle_brake:
