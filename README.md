@@ -1,3 +1,17 @@
+# Important docs files:
+1- the project report at project_report.pdf
+
+2- The project proposal at proposal.pdf
+
+# Pre-Trained Models:
+1- The final weights for baseline model could be found here : \url{https://drive.google.com/open?id=1NwFh6g7qjSHLMDN963Qzn3xVmUBug3Ck} 
+
+2- The final weights for imitation agent based on future model could be found here :
+\url{https://drive.google.com/open?id=1ups8eyg7WYFlua9w8izFa14rCoOM0xq5} 
+
+3- The final weights for future prediction model could be found here :
+\url{https://drive.google.com/open?id=19WVB3JB9sDGNJ-KpH2_0JdfYR0vkEO9l} 
+
 # Project hierarchy:
 1- Imitation_Learning: Training and testing agent which aim to drive the vehicle autonomously by outputing the vehicle's actions (Throttle / Steering Angle / Brake)
 
