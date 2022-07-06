@@ -80,7 +80,7 @@ lazy-object-proxy==1.4.1
 llvmlite==0.28.0
 louis==2.6.4
 lpips-tf==0.0.0
-lxml==3.5.0
+lxml==4.9.1
 Mako==1.0.3
 Markdown==3.1.1
 MarkupSafe==1.1.1
